@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Liste des Sorties</title>
+</head>
+<body>
+    <h1>Liste des Sorties</h1>
+    <ul>
+    {% for sortie in sorties %}
+        <li>{{ sortie.nom }} - {{ sortie.date }}</li>
+    {% endfor %}
+    </ul>
+    <a href="{% url 'creer_sortie' %}">Créer une nouvelle sortie</a>
+</body>
+</html>
