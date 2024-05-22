@@ -1,0 +1,13 @@
+{% extends "sorties/base.html" %}
+
+{% block title %}Liste des Sorties{% endblock %}
+
+{% block content %}
+    <h1>Liste des Sorties</h1>
+    <ul>
+        {% for sortie in sorties %}
+            <li>{{ sortie.nom }} - {{ sortie.date }}</li>
+        {% endfor %}
+    </ul>
+    <a href="{% url 'creer_sortie' %}" class="btn btn-primary">Créer une nouvelle sortie</a>
+{% endblock %}
