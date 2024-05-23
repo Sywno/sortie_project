@@ -1,0 +1,23 @@
+{% extends "sorties/base.html" %}
+
+{% block title %}Liste des Amis{% endblock %}
+
+{% block content %}
+    <h2>Liste des Amis</h2>
+    <ul>
+        {% for friend in friends %}
+            <li>{{ friend.user.username }}</li>
+        {% endfor %}
+    </ul>
+
+    <h2>Demandes d'Ami</h2>
+    <ul>
+        {% for request in friend_requests %}
+            <li>
+                {{ request.from_user.username }} 
+                - <a href="{% url 'accept_friend_request' request.id %}">Accepter</a> 
+                - <a href="{% url 'reject_friend_request' request.id %}">Rejeter</a>
+            </li>
+        {% endfor %}
+    </ul>
+{% endblock %}

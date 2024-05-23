@@ -1,6 +1,7 @@
 from django.apps import AppConfig
 
-
 class SortiesConfig(AppConfig):
-    default_auto_field = 'django.db.models.BigAutoField'
     name = 'sorties'
+
+    def ready(self):
+        import sorties.signals
