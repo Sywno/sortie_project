@@ -6,6 +6,7 @@ from django.db.models import Q
 from django.contrib import messages
 from django.contrib.auth.forms import UserCreationForm
 from .models import Sortie, Profile  # Assurez-vous d'importer Sortie ici
+from .forms import SortieForm  # Assurez-vous d'importer SortieForm ici
 
 
 @login_required
@@ -89,3 +90,7 @@ def creer_sortie(request):
     else:
         form = SortieForm()
     return render(request, 'sorties/creer_sortie.html', {'form': form})
+
+
+def accueil(request):
+    return render(request, 'sorties/accueil.html')

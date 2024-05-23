@@ -4,19 +4,23 @@
 
 {% block content %}
     <h2>Liste des Amis</h2>
-    <ul>
+    <ul class="list-group">
         {% for friend in friends %}
-            <li>{{ friend.user.username }}</li>
+            <li class="list-group-item">
+                {{ friend.user.username }}
+            </li>
         {% endfor %}
     </ul>
 
-    <h2>Demandes d'Ami</h2>
-    <ul>
+    <h2 class="mt-4">Demandes d'Ami</h2>
+    <ul class="list-group">
         {% for request in friend_requests %}
-            <li>
-                {{ request.from_user.username }} 
-                - <a href="{% url 'accept_friend_request' request.id %}">Accepter</a> 
-                - <a href="{% url 'reject_friend_request' request.id %}">Rejeter</a>
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                {{ request.from_user.username }}
+                <div>
+                    <a href="{% url 'accept_friend_request' request.id %}" class="btn btn-success mr-2">Accepter</a>
+                    <a href="{% url 'reject_friend_request' request.id %}" class="btn btn-danger">Rejeter</a>
+                </div>
             </li>
         {% endfor %}
     </ul>
