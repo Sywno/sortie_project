@@ -34,7 +34,7 @@
             color: #000;
             border-radius: 30px;
             transition: box-shadow 0.3s, background-color 0.3s;
-            width: calc(100% - 40px); /* Adjust width to match padding */
+            width: auto;
         }
         
         .sidebar a:hover {
@@ -58,13 +58,15 @@
         }
         
         .button-container {
+            display: flex;
+            justify-content: flex-start;
             width: 100%;
-            padding: 10px 20px; /* Ensure the button matches the padding of other links */
+            padding-left: 20px;
         }
         
-        .button_sidebar {
-            background-color: #fff; /* Change to white background */
-            color: #427641; /* Change text color to green */
+        .button {
+            background-color: #427641;
+            color: white;
             border: none;
             border-radius: 30px;
             padding: 10px 20px;
@@ -74,18 +76,34 @@
             align-items: center;
             justify-content: center;
             transition: border-radius 0.3s, box-shadow 0.3s;
+            width: 80%;
+            max-width: 200px;
+        }
+        .button_sidebar {
+            background-color: #fff; /* Change to white background */
+            color: #427641; /* Change text color to green */
+            border: none;
+            border-radius: 30px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: border-radius 0.3s, box-shadow 0.3s;
             text-decoration: none;
             white-space: nowrap;
-            width: calc(100% - 40px); /* Adjust width to match padding */
+            margin-right: 10px;
+            width: 80%;
         }
         
-        .button_sidebar svg {
-            margin-right: 10px; /* Match the margin of other icons */
+        .button svg {
+            display: none;
         }
         
-        .button_sidebar:hover {
+        .button:hover {
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            background-color: #f0f0f0;
+            background-color: #345c33;
         }
         
         @media (max-width: 768px) {
@@ -164,6 +182,7 @@
                 <span>Créer une sortie</span>
             </a>
         </div>
+    </div>
     </div>
     <div class="content">
         <div class="container">
