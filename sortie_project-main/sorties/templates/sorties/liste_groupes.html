@@ -1,0 +1,14 @@
+{% extends "sorties/base.html" %}
+
+{% block title %}Liste des Groupes{% endblock %}
+
+{% block content %}
+    <h1>Liste des Groupes</h1>
+    <ul>
+        {% for groupe in groupes %}
+            <li>
+                <a href="{% url 'groupe_detail' group_id=groupe.id %}">{{ groupe.nom }}</a>
+            </li>
+        {% endfor %}
+    </ul>
+{% endblock %}

@@ -34,15 +34,16 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'daphne',
+    'channels',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'sorties.apps.SortiesConfig',
+    'sorties',
 ]
-
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -51,6 +52,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'sorties.middleware.LoginRequiredMiddleware', 
 ]
 
 ROOT_URLCONF = 'sortie_project.urls'
@@ -58,7 +60,7 @@ ROOT_URLCONF = 'sortie_project.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -72,6 +74,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'sortie_project.wsgi.application'
+ASGI_APPLICATION = 'sortie_project.asgi.application'
 
 
 # Database
@@ -128,7 +131,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # Redirections après connexion et déconnexion
 # Redirections après connexion et déconnexion
 LOGIN_URL = 'login'
-LOGIN_REDIRECT_URL = 'liste_sorties'
+LOGIN_REDIRECT_URL = 'liste_groupes'
 LOGOUT_REDIRECT_URL = 'login'
 
 # Messages framework
@@ -141,13 +144,13 @@ MESSAGE_TAGS = {
     messages.ERROR: 'danger',
 }
 
-MIDDLEWARE = [
-    'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'sorties.middleware.LoginRequiredMiddleware',  # Ajoutez cette ligne
-]
+
+
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            "hosts": [('127.0.0.1', 6379)],
+        },
+    },
+}

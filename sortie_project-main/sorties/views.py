@@ -1,13 +1,96 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.models import User
-from .models import Profile, FriendRequest
+from .models import Profile, FriendRequest, GroupeAmis, SortieProposee, Participation
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
 from django.contrib import messages
 from django.contrib.auth.forms import UserCreationForm
-from .models import Sortie, Profile  # Assurez-vous d'importer Sortie ici
-from .forms import SortieForm  # Assurez-vous d'importer SortieForm ici
+from .forms import GroupeAmisForm, SortieProposeeForm, ParticipationForm
 
+@login_required
+def proposer_sortie(request, group_id):
+    groupe = get_object_or_404(GroupeAmis, id=group_id)
+    if request.method == 'POST':
+        form = SortieProposeeForm(request.POST)
+        if form.is_valid():
+            sortie = form.save(commit=False)
+            sortie.groupe = groupe
+            sortie.createur = request.user
+            sortie.save()
+            return redirect('groupe_detail', group_id=group_id)
+    else:
+        form = SortieProposeeForm()
+    return render(request, 'sorties/proposer_sortie.html', {'form': form, 'groupe': groupe})
+
+
+from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib.auth.decorators import login_required
+from .models import GroupeAmis, SortieProposee, Participation
+from .forms import ParticipationForm
+
+from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib.auth.decorators import login_required
+from .models import GroupeAmis, SortieProposee, Participation
+from .forms import ParticipationForm
+
+@login_required
+def groupe_detail(request, group_id):
+    groupe = get_object_or_404(GroupeAmis, id=group_id)
+    sorties = SortieProposee.objects.filter(groupe=groupe)
+
+    if request.method == 'POST':
+        sortie_id = request.POST.get('form_id')
+        vient = request.POST.get('vient') == 'True'
+        sortie = get_object_or_404(SortieProposee, id=sortie_id)
+
+        if vient:
+            participation, created = Participation.objects.get_or_create(sortie=sortie, membre=request.user)
+            participation.vient = True
+            participation.save()
+        else:
+            Participation.objects.filter(sortie=sortie, membre=request.user).delete()
+
+    participation_forms = {sortie.id: ParticipationForm() for sortie in sorties}
+    
+    return render(request, 'sorties/groupe_detail.html', {
+        'groupe': groupe,
+        'sorties': sorties,
+        'participation_forms': participation_forms
+    })
+
+@login_required
+def repondre_sortie(request, sortie_id):
+    sortie = get_object_or_404(SortieProposee, id=sortie_id)
+    if request.method == 'POST':
+        form = ParticipationForm(request.POST)
+        if form.is_valid():
+            participation = form.save(commit=False)
+            participation.sortie = sortie
+            participation.membre = request.user
+            participation.save()
+            return redirect('groupe_detail', group_id=sortie.groupe.id)
+    else:
+        form = ParticipationForm()
+    return render(request, 'sorties/repondre_sortie.html', {'form': form, 'sortie': sortie})
+
+@login_required
+def creer_groupe(request):
+    if request.method == 'POST':
+        form = GroupeAmisForm(request.POST)
+        if form.is_valid():
+            groupe = form.save(commit=False)
+            groupe.createur = request.user
+            groupe.save()
+            form.save_m2m()  # Sauvegarder les membres
+            return redirect('liste_groupes')
+    else:
+        form = GroupeAmisForm()
+    return render(request, 'sorties/creer_groupe.html', {'form': form})
+
+@login_required
+def liste_groupes(request):
+    groupes = GroupeAmis.objects.filter(membres=request.user)
+    return render(request, 'sorties/liste_groupes.html', {'groupes': groupes})
 
 @login_required
 def search_users(request):
@@ -76,21 +159,6 @@ def register(request):
     else:
         form = UserCreationForm()
     return render(request, 'sorties/register.html', {'form': form})
-
-def liste_sorties(request):
-    sorties = Sortie.objects.all()
-    return render(request, 'sorties/liste_sorties.html', {'sorties': sorties})
-
-def creer_sortie(request):
-    if request.method == 'POST':
-        form = SortieForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect('liste_sorties')
-    else:
-        form = SortieForm()
-    return render(request, 'sorties/creer_sortie.html', {'form': form})
-
 
 def accueil(request):
     return render(request, 'sorties/accueil.html')

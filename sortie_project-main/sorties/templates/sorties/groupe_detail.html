@@ -1,0 +1,43 @@
+{% extends "sorties/base.html" %}
+{% load custom_filters %}
+
+{% block title %}Détail du Groupe{% endblock %}
+
+{% block content %}
+<h1>{{ groupe.nom }}</h1>
+
+<div class="button-container">
+    <a href="{% url 'proposer_sortie' group_id=groupe.id %}" class="button">Créer une sortie</a>
+</div>
+
+<h2>Sorties proposées</h2>
+<ul>
+    {% for sortie in sorties %}
+        <li>
+            <div>
+                <strong>{{ sortie.nom }}</strong>
+                <p>{{ sortie.description }}</p>
+                <p>Date: {{ sortie.date }}</p>
+                <p>Lieu: {{ sortie.lieu }}</p>
+                <form method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="form_id" value="{{ sortie.id }}">
+                    <label>
+                        <input type="radio" name="vient" value="True"> Oui
+                    </label>
+                    <label>
+                        <input type="radio" name="vient" value="False"> Non
+                    </label>
+                    <button type="submit" class="btn btn-primary">Soumettre</button>
+                </form>
+                <h3>Participants:</h3>
+                <ul>
+                    {% for participant in sortie.participants.all %}
+                        <li>{{ participant.username }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </li>
+    {% endfor %}
+</ul>
+{% endblock %}

@@ -1,19 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
 
-class Sortie(models.Model):
-    nom = models.CharField(max_length=100)
-    description = models.TextField()
-    date = models.DateTimeField()
-    lieu = models.CharField(max_length=200)
-    participants = models.ManyToManyField(User, related_name='sorties')
-    ...
-
-class Groupe(models.Model):
-    nom = models.CharField(max_length=100)
-    membres = models.ManyToManyField(User, related_name='groupes')
-    
-
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     friends = models.ManyToManyField('self', blank=True)
@@ -36,3 +23,34 @@ class FriendRequest(models.Model):
 
     def __str__(self):
         return f'{self.from_user} to {self.to_user}'
+
+class GroupeAmis(models.Model):
+    nom = models.CharField(max_length=100)
+    createur = models.ForeignKey(User, related_name='groupes_crees', on_delete=models.CASCADE)
+    membres = models.ManyToManyField(User, related_name='groupes_amis')
+
+    def __str__(self):
+        return self.nom
+
+class Message(models.Model):
+    groupe = models.ForeignKey(GroupeAmis, on_delete=models.CASCADE, related_name='messages')
+    utilisateur = models.ForeignKey(User, on_delete=models.CASCADE)
+    contenu = models.TextField()
+    date_envoye = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f'{self.utilisateur.username}: {self.contenu[:20]}'
+
+class SortieProposee(models.Model):
+    groupe = models.ForeignKey(GroupeAmis, on_delete=models.CASCADE)
+    nom = models.CharField(max_length=100)
+    description = models.TextField()
+    date = models.DateTimeField()
+    lieu = models.CharField(max_length=100)
+    createur = models.ForeignKey(User, on_delete=models.CASCADE)
+    participants = models.ManyToManyField(User, related_name='sorties_participants', through='Participation')
+
+class Participation(models.Model):
+    sortie = models.ForeignKey(SortieProposee, on_delete=models.CASCADE)
+    membre = models.ForeignKey(User, on_delete=models.CASCADE)
+    vient = models.BooleanField(default=False)  # Ajouter une valeur par défaut
