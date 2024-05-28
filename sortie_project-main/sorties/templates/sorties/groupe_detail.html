@@ -4,40 +4,142 @@
 {% block title %}Détail du Groupe{% endblock %}
 
 {% block content %}
-<h1>{{ groupe.nom }}</h1>
+<link href="https://stackpath.bootstrapcdn.com/bootstrap/5.1.3/css/bootstrap.min.css" rel="stylesheet">
 
-<div class="button-container">
-    <a href="{% url 'proposer_sortie' group_id=groupe.id %}" class="button">Créer une sortie</a>
-</div>
+<style>
+    .group-header {
+        margin-bottom: 40px;
+        text-align: center;
+    }
 
-<h2>Sorties proposées</h2>
-<ul>
-    {% for sortie in sorties %}
-        <li>
-            <div>
-                <strong>{{ sortie.nom }}</strong>
-                <p>{{ sortie.description }}</p>
-                <p>Date: {{ sortie.date }}</p>
-                <p>Lieu: {{ sortie.lieu }}</p>
-                <form method="post">
-                    {% csrf_token %}
-                    <input type="hidden" name="form_id" value="{{ sortie.id }}">
-                    <label>
-                        <input type="radio" name="vient" value="True"> Oui
-                    </label>
-                    <label>
-                        <input type="radio" name="vient" value="False"> Non
-                    </label>
-                    <button type="submit" class="btn btn-primary">Soumettre</button>
-                </form>
-                <h3>Participants:</h3>
-                <ul>
-                    {% for participant in sortie.participants.all %}
-                        <li>{{ participant.username }}</li>
-                    {% endfor %}
-                </ul>
+    .group-header h1 {
+        font-size: 3em;
+        font-weight: bold;
+        margin-bottom: 10px;
+    }
+
+    .button-container {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 30px;
+    }
+
+    .button-container .btn {
+        background-color: #345c33;
+        color: white;
+        padding: 12px 30px;
+        border-radius: 5px;
+        font-size: 1.2em;
+        transition: background-color 0.3s, box-shadow 0.3s;
+    }
+
+    .button-container .btn:hover {
+        background-color: #2a472a;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .sortie-item {
+        margin-bottom: 30px;
+        padding: 20px;
+        background-color: #ffffff;
+        border: 1px solid #ddd;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .sortie-item h5 {
+        margin-top: 20px;
+    }
+
+    .participant-list {
+        list-style: none;
+        padding: 0;
+    }
+
+    .participant-list li {
+        padding: 5px;
+        border-bottom: 1px solid #eee;
+    }
+
+    .participant-list li:last-child {
+        border-bottom: none;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 10px;
+    }
+
+    .action-buttons .btn {
+        flex-grow: 1;
+        padding: 10px;
+        border-radius: 5px;
+        font-size: 1em;
+        transition: background-color 0.3s, box-shadow 0.3s;
+    }
+
+    .action-buttons .btn-oui {
+        background-color: #345c33;
+        color: white;
+    }
+
+    .action-buttons .btn-oui:hover {
+        background-color: #2a472a;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .action-buttons .btn-non {
+        background-color: #dc3545;
+        color: white;
+    }
+
+    .action-buttons .btn-non:hover {
+        background-color: #c82333;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .card {
+        margin-bottom: 20px;
+    }
+</style>
+
+<div class="container mt-5">
+    <div class="group-header">
+        <h1>{{ groupe.nom }}</h1>
+    </div>
+
+    <div class="button-container">
+        <a href="{% url 'proposer_sortie' group_id=groupe.id %}" class="btn">Créer une sortie</a>
+    </div>
+
+    <h2 class="mb-4">Sorties proposées</h2>
+    <div class="row">
+        {% for sortie in sorties %}
+            <div class="col-md-6">
+                <div class="card sortie-item">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ sortie.nom }}</h5>
+                        <p class="card-text">{{ sortie.description }}</p>
+                        <p><strong>Date:</strong> {{ sortie.date }}</p>
+                        <p><strong>Lieu:</strong> {{ sortie.lieu }}</p>
+                        <form method="post">
+                            {% csrf_token %}
+                            <input type="hidden" name="form_id" value="{{ sortie.id }}">
+                            <div class="action-buttons mt-3">
+                                <button type="submit" name="vient" value="True" class="btn btn-oui">Oui</button>
+                                <button type="submit" name="vient" value="False" class="btn btn-non">Non</button>
+                            </div>
+                        </form>
+                        <h5 class="mt-4">Participants:</h5>
+                        <ul class="participant-list">
+                            {% for participant in sortie.participants.all %}
+                                <li>{{ participant.username }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
             </div>
-        </li>
-    {% endfor %}
-</ul>
+        {% endfor %}
+    </div>
+</div>
 {% endblock %}

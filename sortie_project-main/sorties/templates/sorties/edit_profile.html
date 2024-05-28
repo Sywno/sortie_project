@@ -1,0 +1,15 @@
+<!-- edit_profile.html -->
+
+{% extends "sorties/base.html" %}
+
+{% block title %}Éditer le Profil{% endblock %}
+
+{% block content %}
+  <h2>Éditer le Profil</h2>
+  <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ user_form.as_p }}
+    {{ profile_form.as_p }}
+    <button type="submit" class="btn btn-primary">Mettre à jour</button>
+  </form>
+{% endblock %}

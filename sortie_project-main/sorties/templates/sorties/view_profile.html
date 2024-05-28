@@ -1,0 +1,13 @@
+{% extends "sorties/base.html" %}
+
+{% block content %}
+<h1>{{ profile_user.username }}'s Profile</h1>
+{% if profile_user.profile.photo %}
+    <img src="{{ profile_user.profile.photo.url }}" alt="Profile Photo">
+{% else %}
+    <p>No profile photo available.</p>
+{% endif %}
+<p>Username: {{ profile_user.username }}</p>
+<p>Email: {{ profile_user.email }}</p>
+<a href="{% url 'edit_profile' %}">Edit Profile</a>
+{% endblock %}

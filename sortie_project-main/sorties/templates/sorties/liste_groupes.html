@@ -3,11 +3,92 @@
 {% block title %}Liste des Groupes{% endblock %}
 
 {% block content %}
-    <h1>Liste des Groupes</h1>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+            color: #345c33;
+        }
+        h1 {
+            color: #345c33;
+            text-align: center;
+            border-bottom: 2px solid #345c33;
+            padding-bottom: 10px;
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        li {
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            margin: 10px;
+            padding: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: box-shadow 0.3s ease;
+            width: 300px;
+            height: auto;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+            text-align: center;
+        }
+        li:hover {
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        a {
+            text-decoration: none;
+            color: #3498db;
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+        a:hover {
+            text-decoration: underline;
+            color: #2c3e50;
+        }
+        .groupe-details {
+            font-size: 14px;
+            color: #555;
+            text-align: left;
+            width: 100%;
+        }
+        .groupe-details p {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .participants-box {
+            background-color: #f1f1f1;
+            border-radius: 10px;
+            padding: 10px;
+            width: 100%;
+            text-align: left;
+        }
+        .participant-name {
+            padding: 10px 0;
+            border-bottom: 1px solid #ddd;
+        }
+        .participant-name:last-child {
+            border-bottom: none;
+        }
+    </style>
+    <h1>Groupes</h1>
     <ul>
         {% for groupe in groupes %}
             <li>
                 <a href="{% url 'groupe_detail' group_id=groupe.id %}">{{ groupe.nom }}</a>
+                <div class="groupe-details">
+                    <p>Membres du groupe</p>
+                    <div class="participants-box">
+                        {% for participant in groupe.membres.all %}
+                            <div class="participant-name">{{ participant.username }}</div>
+                        {% endfor %}
+                    </div>
+                </div>
             </li>
         {% endfor %}
     </ul>

@@ -6,7 +6,44 @@ from django.db.models import Q
 from django.contrib import messages
 from django.contrib.auth.forms import UserCreationForm
 from .forms import GroupeAmisForm, SortieProposeeForm, ParticipationForm
+from .forms import ProfileForm
+from django.contrib.auth.models import User
+from .forms import UserForm, ProfileForm
+from django.contrib import messages
+from django.contrib.auth.forms import UserCreationForm
+from .forms import CustomUserCreationForm
+from django.contrib.auth import login
 
+
+
+
+@login_required
+def view_profile(request, username):
+    profile_user = get_object_or_404(User, username=username)
+    return render(request, 'sorties/view_profile.html', {'profile_user': profile_user})
+
+@login_required
+def edit_profile(request):
+    if request.method == 'POST':
+        user_form = UserForm(request.POST, instance=request.user)
+        profile_form = ProfileForm(request.POST, request.FILES, instance=request.user.profile)
+        if user_form.is_valid() and profile_form.is_valid():
+            user_form.save()
+            profile_form.save()
+            messages.success(request, 'Votre profil a été mis à jour avec succès !')
+            return redirect('view_profile', username=request.user.username)
+        else:
+            messages.error(request, 'Veuillez corriger les erreurs ci-dessous.')
+    else:
+        user_form = UserForm(instance=request.user)
+        profile_form = ProfileForm(instance=request.user.profile)
+
+    return render(request, 'sorties/edit_profile.html', {
+        'user_form': user_form,
+        'profile_form': profile_form
+    })
+
+# Les autres vues restent inchangées
 @login_required
 def proposer_sortie(request, group_id):
     groupe = get_object_or_404(GroupeAmis, id=group_id)
@@ -23,15 +60,6 @@ def proposer_sortie(request, group_id):
     return render(request, 'sorties/proposer_sortie.html', {'form': form, 'groupe': groupe})
 
 
-from django.shortcuts import render, get_object_or_404, redirect
-from django.contrib.auth.decorators import login_required
-from .models import GroupeAmis, SortieProposee, Participation
-from .forms import ParticipationForm
-
-from django.shortcuts import render, get_object_or_404, redirect
-from django.contrib.auth.decorators import login_required
-from .models import GroupeAmis, SortieProposee, Participation
-from .forms import ParticipationForm
 
 @login_required
 def groupe_detail(request, group_id):
@@ -76,7 +104,7 @@ def repondre_sortie(request, sortie_id):
 @login_required
 def creer_groupe(request):
     if request.method == 'POST':
-        form = GroupeAmisForm(request.POST)
+        form = GroupeAmisForm(request.POST, user=request.user)
         if form.is_valid():
             groupe = form.save(commit=False)
             groupe.createur = request.user
@@ -84,12 +112,12 @@ def creer_groupe(request):
             form.save_m2m()  # Sauvegarder les membres
             return redirect('liste_groupes')
     else:
-        form = GroupeAmisForm()
+        form = GroupeAmisForm(user=request.user)
     return render(request, 'sorties/creer_groupe.html', {'form': form})
 
 @login_required
 def liste_groupes(request):
-    groupes = GroupeAmis.objects.filter(membres=request.user)
+    groupes = GroupeAmis.objects.prefetch_related('membres').filter(membres=request.user)
     return render(request, 'sorties/liste_groupes.html', {'groupes': groupes})
 
 @login_required
@@ -146,18 +174,24 @@ def view_friends(request):
     profile = request.user.profile
     friends = profile.friends.all()
     friend_requests = FriendRequest.objects.filter(to_user=request.user)
-    return render(request, 'sorties/view_friends.html', {'friends': friends, 'friend_requests': friend_requests})
+    return render(request, 'sorties/view_friends.html', {
+        'friends': friends,
+        'friend_requests': friend_requests
+    })
+    
 
 def register(request):
     if request.method == 'POST':
-        form = UserCreationForm(request.POST)
+        form = CustomUserCreationForm(request.POST, request.FILES)
         if form.is_valid():
-            form.save()
-            username = form.cleaned_data.get('username')
-            messages.success(request, f'Votre compte a été créé ! Vous pouvez maintenant vous connecter.')
-            return redirect('login')
+            user = form.save()
+            login(request, user)
+            messages.success(request, 'Votre compte a été créé avec succès !')
+            return redirect('liste_groupes')
+        else:
+            messages.error(request, 'Veuillez corriger les erreurs ci-dessous.')
     else:
-        form = UserCreationForm()
+        form = CustomUserCreationForm()
     return render(request, 'sorties/register.html', {'form': form})
 
 def accueil(request):

@@ -1,10 +1,8 @@
 from django.contrib import admin
-from .models import GroupeAmis, Message, SortieProposee, Participation  # Ajoutez les nouveaux modèles
+from .models import Profile, FriendRequest, GroupeAmis, Message, SortieProposee, Participation
 
-# Supprimez ou commentez la ligne suivante
-# from .models import Sortie
-
-# Enregistrez les nouveaux modèles dans l'admin
+admin.site.register(Profile)
+admin.site.register(FriendRequest)
 admin.site.register(GroupeAmis)
 admin.site.register(Message)
 admin.site.register(SortieProposee)

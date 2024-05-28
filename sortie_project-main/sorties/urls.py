@@ -20,4 +20,6 @@ urlpatterns = [
     path('groupe/<int:group_id>/', views.groupe_detail, name='groupe_detail'),
     path('groupe/<int:group_id>/proposer_sortie/', views.proposer_sortie, name='proposer_sortie'),
     path('sortie/<int:sortie_id>/repondre/', views.repondre_sortie, name='repondre_sortie'),
+    path('profile/edit/', views.edit_profile, name='edit_profile'),
+    path('profile/<str:username>/', views.view_profile, name='view_profile'),
 ]
