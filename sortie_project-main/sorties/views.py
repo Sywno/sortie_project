@@ -13,8 +13,7 @@ from django.contrib import messages
 from django.contrib.auth.forms import UserCreationForm
 from .forms import CustomUserCreationForm
 from django.contrib.auth import login
-
-
+from django.contrib.auth import logout
 
 
 @login_required
@@ -196,3 +195,8 @@ def register(request):
 
 def accueil(request):
     return render(request, 'sorties/accueil.html')
+
+
+def logout_view(request):
+    logout(request)
+    return redirect('accueil')
