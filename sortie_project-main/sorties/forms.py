@@ -8,9 +8,10 @@ from django.contrib.auth.forms import UserCreationForm
 
 class GroupeAmisForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
-        user = kwargs.pop('user')
+        user = kwargs.pop('user', None)
         super(GroupeAmisForm, self).__init__(*args, **kwargs)
-        self.fields['membres'].queryset = user.profile.friends.all()
+        if user:
+            self.fields['membres'].queryset = User.objects.filter(profile__in=user.profile.friends.all())
 
     class Meta:
         model = GroupeAmis
@@ -18,7 +19,6 @@ class GroupeAmisForm(forms.ModelForm):
         widgets = {
             'membres': forms.CheckboxSelectMultiple
         }
-
 class SortieProposeeForm(forms.ModelForm):
     class Meta:
         model = SortieProposee
@@ -57,3 +57,8 @@ class CustomUserCreationForm(UserCreationForm):
                 profile = Profile(user=user, photo=self.cleaned_data['photo'])
                 profile.save()
         return user
+    
+    
+    
+class AddMemberForm(forms.Form):
+    membre = forms.ModelChoiceField(queryset=User.objects.all(), label="Ajouter un membre")

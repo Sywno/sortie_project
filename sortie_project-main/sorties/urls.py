@@ -18,8 +18,13 @@ urlpatterns = [
     path('creer_groupe/', views.creer_groupe, name='creer_groupe'),
     path('groupes/', views.liste_groupes, name='liste_groupes'),
     path('groupe/<int:group_id>/', views.groupe_detail, name='groupe_detail'),
+    path('groupe/<int:group_id>/ajouter_membre/', views.ajouter_membre, name='ajouter_membre'),
+    path('groupe/<int:group_id>/supprimer_membre/<int:user_id>/', views.supprimer_membre, name='supprimer_membre'),
     path('groupe/<int:group_id>/proposer_sortie/', views.proposer_sortie, name='proposer_sortie'),
     path('sortie/<int:sortie_id>/repondre/', views.repondre_sortie, name='repondre_sortie'),
     path('profile/edit/', views.edit_profile, name='edit_profile'),
     path('profile/<str:username>/', views.view_profile, name='view_profile'),
+    path('mes_evenements/', views.mes_evenements, name='mes_evenements'),
+    path('annuler_participation/<int:participation_id>/', views.annuler_participation, name='annuler_participation'),
+    path('toggle_participation/<int:event_id>/', views.toggle_participation, name='toggle_participation'),
 ]

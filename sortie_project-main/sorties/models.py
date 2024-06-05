@@ -29,7 +29,13 @@ class FriendRequest(models.Model):
 class GroupeAmis(models.Model):
     nom = models.CharField(max_length=100)
     createur = models.ForeignKey(User, related_name='groupes_crees', on_delete=models.CASCADE)
-    membres = models.ManyToManyField(User, related_name='groupes_amis')
+    membres = models.ManyToManyField(User, related_name='groupes')
+    administrateur = models.ForeignKey(User, related_name='groupes_administres', on_delete=models.CASCADE)
+
+    def save(self, *args, **kwargs):
+        if not self.pk:
+            self.administrateur = self.createur
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return self.nom

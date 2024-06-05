@@ -1,0 +1,124 @@
+{% extends "sorties/base.html" %}
+
+{% block title %}Mes Événements{% endblock %}
+
+{% block content %}
+    <style>
+        .tabs {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .tab {
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.3s;
+            padding: 10px 20px;
+            flex: 1;
+            font-weight: bold;
+            border-bottom: 2px solid transparent;
+        }
+
+        .tab:hover {
+            color: #345c33;
+        }
+
+        .tab.active {
+            border-bottom: 2px solid #345c33;
+            color: #345c33;
+        }
+
+        .list-group {
+            padding: 0;
+            list-style: none;
+        }
+
+        .list-group-item {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            padding: 10px;
+            border-bottom: 1px solid #ccc;
+            transition: background-color 0.3s;
+        }
+
+        .list-group-item:hover {
+            background-color: #f0f0f0;
+        }
+
+        .event-name {
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+
+        .event-details {
+            margin: 5px 0;
+        }
+
+        .event-status {
+            font-weight: bold;
+            color: green;
+        }
+
+        .event-status.not-participating {
+            color: red;
+        }
+
+        .toggle-participation {
+            margin-top: 10px;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+
+        .toggle-participation:hover {
+            color: #345c33;
+        }
+
+        #calendar {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+    </style>
+
+    <div class="tabs">
+        <div class="tab active" id="tab-list">Mes Événements</div>
+        <div class="tab" id="tab-calendar">Calendrier</div>
+    </div>
+
+    <div id="content-list" class="tab-content active">
+        <h2>Mes Événements</h2>
+        <ul class="list-group">
+            {% for event in all_events %}
+                <li class="list-group-item">
+                    <span class="event-name">{{ event.nom }}</span>
+                    <div class="event-details">
+                        <span>Date: {{ event.date }}</span><br>
+                        <span>Lieu: {{ event.lieu }}</span><br>
+                        <span>Groupe: {{ event.groupe.nom }}</span>
+                    </div>
+                    {% if event.id in participation_status %}
+                        <span class="event-status">Je participe</span>
+                        <form method="post" action="{% url 'toggle_participation' event.id %}" class="toggle-participation">
+                            {% csrf_token %}
+                            <button type="submit">Annuler participation</button>
+                        </form>
+                    {% else %}
+                        <span class="event-status not-participating">Je ne participe pas</span>
+                        <form method="post" action="{% url 'toggle_participation' event.id %}" class="toggle-participation">
+                            {% csrf_token %}
+                            <button type="submit">Participer</button>
+                        </form>
+                    {% endif %}
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <div id="content-calendar" class="tab-content" style="display: none;">
+        <h2>Calendrier des Événements</h2>
+        <div id='calendar'></div>
+    </div>
+
+    
+{% endblock %}

@@ -14,6 +14,88 @@ from django.contrib.auth.forms import UserCreationForm
 from .forms import CustomUserCreationForm
 from django.contrib.auth import login
 from django.contrib.auth import logout
+from .forms import AddMemberForm
+
+
+@login_required
+def mes_evenements(request):
+    # Get the groups the user belongs to
+    user_groups = GroupeAmis.objects.filter(membres=request.user)
+
+    # Get all events from those groups
+    all_events = SortieProposee.objects.filter(groupe__in=user_groups).select_related('groupe')
+
+    # Get user participations
+    user_participations = Participation.objects.filter(membre=request.user, vient=True).select_related('sortie')
+
+    # Create a dictionary to map events to participation status
+    participation_status = {participation.sortie.id: 'Je participe' for participation in user_participations}
+
+    context = {
+        'all_events': all_events,
+        'participation_status': participation_status
+    }
+    return render(request, 'sorties/mes_evenements.html', context)
+
+
+@login_required
+def toggle_participation(request, event_id):
+    event = get_object_or_404(SortieProposee, id=event_id)
+    participation, created = Participation.objects.get_or_create(membre=request.user, sortie=event)
+
+    if participation.vient:
+        participation.vient = False
+        messages.success(request, f'Vous avez annulé votre participation à {event.nom}.')
+    else:
+        participation.vient = True
+        messages.success(request, f'Vous participez maintenant à {event.nom}.')
+
+    participation.save()
+    return redirect('mes_evenements')
+
+@login_required
+def annuler_participation(request, participation_id):
+    participation = get_object_or_404(Participation, id=participation_id, membre=request.user)
+    if request.method == 'POST':
+        participation.vient = False
+        participation.save()
+        messages.success(request, 'Vous avez annulé votre participation à cet événement.')
+    return redirect('mes_evenements')
+
+@login_required
+def ajouter_membre(request, group_id):
+    groupe = get_object_or_404(GroupeAmis, id=group_id)
+    if request.user != groupe.administrateur:
+        messages.error(request, "Vous n'êtes pas autorisé à ajouter des membres à ce groupe.")
+        return redirect('groupe_detail', group_id=group_id)
+
+    if request.method == 'POST':
+        form = AddMemberForm(request.POST)
+        if form.is_valid():
+            membre = form.cleaned_data['membre']
+            groupe.membres.add(membre)
+            messages.success(request, f'{membre.username} a été ajouté au groupe.')
+            return redirect('groupe_detail', group_id=group_id)
+    else:
+        form = AddMemberForm()
+
+    return render(request, 'sorties/ajouter_membre.html', {'groupe': groupe, 'form': form})
+
+@login_required
+def supprimer_membre(request, group_id, user_id):
+    groupe = get_object_or_404(GroupeAmis, id=group_id)
+    if request.user != groupe.administrateur:
+        messages.error(request, "Vous n'êtes pas autorisé à supprimer des membres de ce groupe.")
+        return redirect('groupe_detail', group_id=group_id)
+
+    membre = get_object_or_404(User, id=user_id)
+    if membre == groupe.administrateur:
+        messages.error(request, "Vous ne pouvez pas vous supprimer en tant qu'administrateur du groupe.")
+    else:
+        groupe.membres.remove(membre)
+        messages.success(request, f'{membre.username} a été supprimé du groupe.')
+    
+    return redirect('groupe_detail', group_id=group_id)
 
 
 @login_required
@@ -100,6 +182,7 @@ def repondre_sortie(request, sortie_id):
         form = ParticipationForm()
     return render(request, 'sorties/repondre_sortie.html', {'form': form, 'sortie': sortie})
 
+
 @login_required
 def creer_groupe(request):
     if request.method == 'POST':
@@ -107,16 +190,26 @@ def creer_groupe(request):
         if form.is_valid():
             groupe = form.save(commit=False)
             groupe.createur = request.user
+            groupe.administrateur = request.user
             groupe.save()
-            form.save_m2m()  # Sauvegarder les membres
+            form.save_m2m()
+            # Assurer que le créateur est membre après save_m2m()
+            if request.user not in groupe.membres.all():
+                groupe.membres.add(request.user)
+            messages.success(request, 'Le groupe a été créé avec succès.')
+            print(f"Groupe créé: {groupe.nom}, Membres: {[m.username for m in groupe.membres.all()]}")
             return redirect('liste_groupes')
+        else:
+            messages.error(request, 'Veuillez corriger les erreurs ci-dessous.')
     else:
         form = GroupeAmisForm(user=request.user)
     return render(request, 'sorties/creer_groupe.html', {'form': form})
 
 @login_required
 def liste_groupes(request):
-    groupes = GroupeAmis.objects.prefetch_related('membres').filter(membres=request.user)
+    groupes = GroupeAmis.objects.filter(membres=request.user).prefetch_related('membres')
+    for groupe in groupes:
+        print(f'Groupe: {groupe.nom}, Membres: {[m.username for m in groupe.membres.all()]}')
     return render(request, 'sorties/liste_groupes.html', {'groupes': groupes})
 
 @login_required

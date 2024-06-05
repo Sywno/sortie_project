@@ -101,6 +101,39 @@
     .card {
         margin-bottom: 20px;
     }
+
+    .members-box {
+        margin-top: 40px;
+    }
+
+    .members-box h3 {
+        font-size: 2em;
+        margin-bottom: 20px;
+    }
+
+    .members-box ul {
+        list-style: none;
+        padding: 0;
+    }
+
+    .members-box ul li {
+        padding: 10px;
+        border-bottom: 1px solid #ddd;
+    }
+
+    .members-box ul li:last-child {
+        border-bottom: none;
+    }
+
+    .members-box .btn {
+        margin-top: 20px;
+        background-color: #345c33;
+        color: white;
+    }
+
+    .members-box .btn:hover {
+        background-color: #2a472a;
+    }
 </style>
 
 <div class="container mt-5">
@@ -140,6 +173,22 @@
                 </div>
             </div>
         {% endfor %}
+    </div>
+
+    <div class="members-box">
+        <h3>Membres du groupe</h3>
+        <ul>
+            {% for membre in groupe.membres.all %}
+                <li>{{ membre.username }}
+                    {% if request.user == groupe.administrateur and membre != groupe.administrateur %}
+                        <a href="{% url 'supprimer_membre' groupe.id membre.id %}" class="btn btn-danger btn-sm ml-3">Supprimer</a>
+                    {% endif %}
+                </li>
+            {% endfor %}
+        </ul>
+        {% if request.user == groupe.administrateur %}
+            <a href="{% url 'ajouter_membre' groupe.id %}" class="btn">Ajouter un membre</a>
+        {% endif %}
     </div>
 </div>
 {% endblock %}
